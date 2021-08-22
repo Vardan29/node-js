@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken';
+import {UserRoles} from "../enums/roles.enum";
 
-const generateToken = (id, roles): string => {
+// The function for generating the JWT token.
+const generateToken = (id: string, roles: UserRoles): string => {
     return jwt.sign(
         {id, roles},
         process.env.JWT_SECRET,
-        {expiresIn: "24h"}
+        {expiresIn: "1h"}
     );
 }
 

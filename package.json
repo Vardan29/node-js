@@ -2,7 +2,7 @@
   "name": "starting-backend-study",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.ts",
+  "main": "server.ts",
   "scripts": {
     "dev-server": "tsc-watch --noClear -p tsconfig.json --onSuccess \"node ./dist/server.js\""
   },

@@ -1,13 +1,10 @@
 import {Schema, model} from 'mongoose';
+import {UserRoles} from "../enums/roles.enum";
 
-type roles = 'USER' | 'ADMIN';
-
-interface Role {
-    value: roles
-}
-
-const schema = new Schema<Role>({
-    value: {type: String, unique: true, default: 'USER'}
+// Initializing mongoose schema for user roles.
+const schema = new Schema({
+    value: {type: UserRoles, unique: true, default: UserRoles.USER}
 });
 
-export default model<Role>('Role', schema);
+// Exporting the model of roles schema.
+export default model('Role', schema);

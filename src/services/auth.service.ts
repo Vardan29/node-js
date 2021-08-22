@@ -1,44 +1,51 @@
+import bcrypt from 'bcryptjs';
 import User from '../models/User';
 import Role from '../models/Role';
-import bcrypt from 'bcryptjs';
+import {UserRoles} from "../enums/roles.enum";
+import {IUser} from "../interfaces/IUser.interface";
+import {IRole} from "../interfaces/IRole.interface";
 import generateToken from '../helpers/generateToken';
 
 class AuthService {
-    checkLogin = async (user) => {
-        const checkedUser = await User.findOne({email: user.email});
+    // Checking if email and password match with DB data.
+    // Then returning access token to log in.
+    checkLogin = async (user: IUser): Promise<Array<string>> => {
+        const checkedUser: IUser = await User.findOne({email: user.email});
 
         if (!checkedUser) {
             throw new Error('Incorrect user data.');
         }
 
-        const isEqual = await bcrypt.compare(user.password, checkedUser.password);
+        const isEqual: Promise<boolean> = await bcrypt.compare(user.password, checkedUser.password);
 
         if (!isEqual) {
             throw new Error('Incorrect user data.');
         }
 
-        const token = generateToken(checkedUser._id, checkedUser.roles);
+        const token: string = generateToken(checkedUser._id, checkedUser.roles);
 
         return [token, checkedUser._id];
     }
-    checkRegister = async (user) => {
+
+    // Validating incoming data and registering user if everything is alright.
+    checkRegister = async (user: IUser): Promise<IUser> => {
         const {firstName, lastName, age, password, email} = user;
         const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        const v_email = re.test(String(email).toLowerCase());
+        const v_email: boolean = re.test(String(email).toLowerCase());
 
         if (!firstName || !lastName || !age || password.length < 8 || !v_email) {
-            throw new Error('Incorrect data sended.');
+            throw new Error('Incorrect data was sent.');
         }
 
-        const createdAt = new Date().toTimeString();
-        const alreadyExists = await User.findOne({email});
+        const createdAt: string = new Date().toTimeString();
+        const alreadyExists: IUser = await User.findOne({email});
 
         if (alreadyExists) {
             throw new Error('User already exists');
         }
 
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const role = await Role.findOne({value: 'USER'});
+        const hashedPassword: Promise<string> = await bcrypt.hash(password, 12);
+        const role: IRole = await Role.findOne({value: UserRoles.USER});
 
         return await User.create({
             firstName,
@@ -52,4 +59,5 @@ class AuthService {
     }
 }
 
+// Exporting an instance of the service class.
 export default new AuthService();
